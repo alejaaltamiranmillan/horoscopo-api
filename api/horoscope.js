@@ -9,21 +9,27 @@ app.use(cors({
 }));
 
 app.get('/api/horoscope', (req, res) => {
-  const { sign } = req.query;
-  
-  if (!sign || !horoscopes[sign.toLowerCase()]) {
-    return res.status(400).json({
-      error: 'Signo zodiacal no válido'
-    });
-  }
+    const { sign } = req.query;
 
-  const horoscopeArray = horoscopes[sign.toLowerCase()];
-  const randomIndex = Math.floor(Math.random() * horoscopeArray.length);
-  
-  res.json({
-    sign: sign.toLowerCase(),
-    horoscope: horoscopeArray[randomIndex]
-  });
+    // Normalizar el signo recibido para eliminar tildes y convertir a minúsculas
+    const signoNormalizado = sign.toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+    if (!signoNormalizado || !horoscopes[signoNormalizado]) {
+        return res.status(400).json({
+            error: 'Signo zodiacal no válido'
+        });
+    }
+
+    const horoscopeArray = horoscopes[signoNormalizado];
+    const randomIndex = Math.floor(Math.random() * horoscopeArray.length);
+
+    res.json({
+        sign: signoNormalizado,
+        horoscope: horoscopeArray[randomIndex]
+    });
 });
 
 module.exports = app;
